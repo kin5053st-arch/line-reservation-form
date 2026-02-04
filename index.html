@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="format-detection" content="telephone=no">
+  <title>ご予約フォーム</title>
+  <meta name="description" content="LINEから簡単に予約できるフォームです。">
+
+  <!-- LIFF SDK -->
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <!-- スタイルシート -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="app-container">
+
+    <!-- ヘッダー -->
+    <header class="header">
+      <h1 class="header-title" id="headerTitle">ご予約</h1>
+    </header>
+
+    <!-- ステップインジケーター -->
+    <div class="step-indicator">
+      <div class="step-indicator-item active">
+        <div class="step-indicator-circle">1</div>
+        <span class="step-indicator-label">メニュー</span>
+      </div>
+      <div class="step-indicator-line"></div>
+      <div class="step-indicator-item">
+        <div class="step-indicator-circle">2</div>
+        <span class="step-indicator-label">日時</span>
+      </div>
+      <div class="step-indicator-line"></div>
+      <div class="step-indicator-item">
+        <div class="step-indicator-circle">3</div>
+        <span class="step-indicator-label">情報入力</span>
+      </div>
+      <div class="step-indicator-line"></div>
+      <div class="step-indicator-item">
+        <div class="step-indicator-circle">4</div>
+        <span class="step-indicator-label">確認</span>
+      </div>
+    </div>
+
+    <p class="step-text" id="stepText">ステップ 1 / 4</p>
+
+    <!-- ステップ1: 来院目的とメニュー選択 -->
+    <div id="step1" class="step-content active">
+      <div class="card">
+        <h2 class="card-title">来院区分を選択</h2>
+        <p class="card-description">初めてご来院の方は「初診」を、2回目以降の方は「再診」をお選びください。</p>
+
+        <div class="visit-type-group">
+          <div class="visit-type-option">
+            <input type="radio" id="visitFirst" name="visitType" value="first">
+            <label for="visitFirst" class="visit-type-label">
+              <span class="visit-type-icon">🆕</span>
+              <span class="visit-type-name">初診</span>
+              <span class="visit-type-desc">初めての方</span>
+            </label>
+          </div>
+          <div class="visit-type-option">
+            <input type="radio" id="visitRevisit" name="visitType" value="revisit">
+            <label for="visitRevisit" class="visit-type-label">
+              <span class="visit-type-icon">🔄</span>
+              <span class="visit-type-name">再診</span>
+              <span class="visit-type-desc">2回目以降</span>
+            </label>
+          </div>
+        </div>
+        <div id="visitType-error" class="error-message"></div>
+      </div>
+
+      <!-- 初診用メニュー -->
+      <div id="firstVisitMenuSection" class="card menu-section">
+        <h2 class="card-title">おすすめメニュー</h2>
+        <p class="card-description">初めての方は、まずご相談からどうぞ。</p>
+        <div id="firstVisitMenuContainer" class="menu-grid"></div>
+      </div>
+
+      <!-- 施術メニュー -->
+      <div id="menuSection" class="card menu-section">
+        <h2 class="card-title">施術メニューを選択</h2>
+        <p class="card-description">ご希望のメニューをお選びください。</p>
+        <div id="menuContainer" class="menu-grid"></div>
+        <div id="menu-error" class="error-message"></div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" id="nextBtn1" class="btn btn-primary">
+          次へ進む
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ステップ2: 日付と時間帯選択 -->
+    <div id="step2" class="step-content">
+      <div class="card">
+        <h2 class="card-title">ご希望の日を選択</h2>
+        <p class="card-description">ご来院希望日をお選びください。</p>
+
+        <div class="date-scroll-container">
+          <div id="dateContainer" class="date-container"></div>
+        </div>
+        <div id="date-error" class="error-message"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">ご希望の時間帯を選択</h2>
+        <p class="card-description">ご希望の開始時間をお選びください。</p>
+
+        <div id="timeContainer" class="time-container"></div>
+        <div id="time-error" class="error-message"></div>
+      </div>
+
+      <div class="button-group">
+        <div class="button-row">
+          <button type="button" class="btn btn-back">
+            ← 戻る
+          </button>
+          <button type="button" id="nextBtn2" class="btn btn-primary">
+            次へ進む →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ステップ3: お客様情報入力 -->
+    <div id="step3" class="step-content">
+      <div class="card">
+        <h2 class="card-title">お客様情報の入力</h2>
+        <p class="card-description">ご連絡先をご入力ください。</p>
+
+        <div class="form-group">
+          <label for="customerName" class="form-label">
+            お名前
+            <span class="required">必須</span>
+          </label>
+          <input type="text" id="customerName" class="form-input" placeholder="例：山田 太郎" autocomplete="name">
+          <div id="customerName-error" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone" class="form-label">
+            電話番号
+            <span class="required">必須</span>
+          </label>
+          <input type="tel" id="phone" class="form-input" placeholder="例：090-1234-5678" autocomplete="tel">
+          <div id="phone-error" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="symptomNote" class="form-label">
+            お悩みや症状
+            <span class="optional">任意</span>
+          </label>
+          <textarea id="symptomNote" class="form-input" placeholder="例：最近肩こりがひどく、頭痛もあります" maxlength="200"></textarea>
+          <div class="form-hint">
+            <span>気になる症状があればご記入ください</span>
+            <span id="symptomNote-count" class="char-count">0/200</span>
+          </div>
+          <div id="symptomNote-error" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="memo" class="form-label">
+            連絡事項
+            <span class="optional">任意</span>
+          </label>
+          <textarea id="memo" class="form-input" placeholder="例：駐車場を利用したいです" maxlength="200"></textarea>
+          <div class="form-hint">
+            <span>その他ご要望があればご記入ください</span>
+            <span id="memo-count" class="char-count">0/200</span>
+          </div>
+          <div id="memo-error" class="error-message"></div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <div class="button-row">
+          <button type="button" class="btn btn-back">
+            ← 戻る
+          </button>
+          <button type="button" id="nextBtn3" class="btn btn-primary">
+            確認へ →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ステップ4: 確認と確定 -->
+    <div id="step4" class="step-content">
+      <div class="card">
+        <h2 class="card-title">ご予約内容の確認</h2>
+        <p class="card-description">以下の内容でよろしければ「予約を確定する」を押してください。</p>
+
+        <div id="confirmationContent"></div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" id="confirmBtn" class="btn btn-accent">
+          ✓ 予約を確定する
+        </button>
+        <button type="button" id="editBtn" class="btn btn-secondary">
+          内容を修正する
+        </button>
+      </div>
+    </div>
+
+    <!-- 完了画面 -->
+    <div id="completionScreen" class="step-content completion-screen">
+      <div class="completion-icon">🎉</div>
+      <h2 class="completion-title">ご予約ありがとうございます</h2>
+      <p class="completion-message">
+        ご予約を受け付けました。<br>
+        確認のご連絡をお待ちください。
+      </p>
+
+      <div id="completionSummary" class="completion-summary"></div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-primary btn-close-liff">
+          LINEに戻る
+        </button>
+      </div>
+
+      <p class="mt-lg" style="font-size: 14px; color: var(--color-text-secondary);">
+        ※ 予約内容はLINEトークでもご確認いただけます
+      </p>
+    </div>
+
+    <!-- エラー画面 -->
+    <div id="errorScreen" class="step-content error-screen">
+      <div class="error-icon">😢</div>
+      <h2 class="error-title">送信できませんでした</h2>
+      <p class="error-message-text">
+        通信エラーが発生しました。<br>
+        お手数ですが、もう一度お試しください。
+      </p>
+
+      <div class="button-group">
+        <button type="button" id="retryBtn" class="btn btn-primary">
+          もう一度送信する
+        </button>
+        <button type="button" class="btn btn-secondary btn-close-liff">
+          LINEトークで連絡する
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ローディングオーバーレイ -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">送信中...</p>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="js/config.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/liff-init.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
